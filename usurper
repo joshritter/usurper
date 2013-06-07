@@ -1,0 +1,59 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use Getopt::Long;
+use Usurper::Model::Character;
+use Usurper::Model::Town;
+use Usurper::Factory::Item;
+use Usurper::Controller::CreateCharacter;
+use Usurper::Controller::Town;
+use Usurper::Controller::Init;
+use Usurper::Database;
+use Data::Dumper;
+use DateTime;
+use POSIX;#for ceil
+
+
+#this controller is responsible for all game resets (full reset, daily, and also initial installs)
+my $init = Usurper::Controller::Init->new();
+
+my $reset = 0;
+my $value = GetOptions (
+    'reset=s'        => \$reset,
+#XXX add an install option? -sets up config, installs tables, and calls reset
+);
+
+if($reset){#restrict to sudo user or password protect via config?
+    print "Resetting game ...\n\r\n\r";
+    $init->reset();
+    print "... Finished\n\r\n\r";
+}
+
+my $db = Usurper::Database->new();
+$db->readQuery("SELECT * from Settings");
+my $daily_settings = $db->fetchRow();
+my $date = $daily_settings->{'last_update'};
+
+if($init->needsDailyReset($date)){
+    $init->dailyReset();
+
+    #refetch settings after reset
+    $db->readQuery("SELECT * from Settings");
+    $daily_settings = $db->fetchRow();
+
+}
+
+my $game_settings = Usurper::Settings->new();
+$game_settings->setDailySettings($daily_settings);
+
+#prompt user for login/new character creation
+my $character = $init->initCharacter();
+
+my $town = Usurper::Controller::Town->new(Usurper::Model::Town->new("Ausburg"), $game_settings);
+
+# This kicks off the main game loop which waits for user input
+$town->enter($character);
+
+1;
