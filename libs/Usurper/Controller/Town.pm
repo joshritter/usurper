@@ -13,6 +13,7 @@ use Usurper::Controller::Area::MagicStore;
 use Usurper::Controller::Area::Inn;
 use Usurper::Controller::Area::Bank;
 use Usurper::Controller::Area::Jail;
+use Usurper::Controller::Area::Castle;
 use Usurper::Factory::Character;
 
 use base qw(Usurper::Controller);
@@ -34,6 +35,7 @@ sub new {
     $self->{'_controllers'}->{'bank'} = Usurper::Controller::Area::Bank->new($town->getBank());
     $self->{'_controllers'}->{'jail'} = Usurper::Controller::Area::Jail->new($town->getJail(), $game_settings->getDailySettings()->{'had_jail_escape_attempt'});
     $self->{'_controllers'}->{'stats'} = Usurper::Controller::Area::CharacterStats->new();
+    $self->{'_controllers'}->{'castle'} = Usurper::Controller::Area::Castle->new();
     return $self;
 }
 
@@ -109,6 +111,9 @@ sub enter {
             $input = '?';
         } elsif($input =~ m/s/i) {
             $self->getController('stats')->enter($character);
+            $input = '?';
+        } elsif($input =~ m/k/i) {
+            $return = $self->getController('castle')->enter($character);
             $input = '?';
         } elsif($input =~ m/d/i) {
             $return = $self->getController('dungeon')->enter($character);

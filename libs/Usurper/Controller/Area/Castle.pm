@@ -1,4 +1,4 @@
-package Usurper::Controller::Area::Bank;
+package Usurper::Controller::Area::Castle;
 
 use strict;
 use warnings;
@@ -21,95 +21,54 @@ sub enter {
 
     $self->clearScreen();
     my $store = $self->{'_store'};
-    
-    print "You enter the bank, you see a sign that reads '".$store->getName()."', you walk up to the front counter hit\n\rthe bell to get someones attention.  The owner, ". $store->getOwner();
-    print ", walks in from the back room and asks\n\rwhat you what you need.  What do you want to do next?\n\r\n\r";
-    
+
+    if($character->getIsKing()){
+        return $self->enterCastle($character);
+    }
+
+    print "Commoners are not allowed in the castle, so you make your way up the the front gate... What do you do next?\n\r";
     my $input = "?";
     while($input !~ m/r/i){
         if($input =~ m/\?/i){
             $input = $self->getUserInput($self->getMenuText());
-        } elsif ($input =~ m/d/i){
-            $self->depositMoney($character); 
+        } elsif ($input =~ m/u/i){
+            $self->infiltrateCastle($character); 
             $input = "?";
-        } elsif ($input =~ m/w/i){
-            $self->withdrawMoney($character);
-            $input = "?";
-        } elsif ($input =~ m/s/i){
-            print "You aren't near strong enough to pull that off!\n\r";
-            #XXX implement
-            $input = "?"; 
+        }  else {
+            $input = $self->getUserInput("\n\rCastle(? for menu)");
+        }
+    }
+}
+
+sub infiltrateCastle {
+    my $self = shift;
+    my $character = shift;
+
+    print "try again later";
+}
+
+sub enterCastle {
+    my $self = shift;
+    my $character = shift;
+
+    print "You walk through the gates into the castle.  It is good to be home!\n\r";
+    my $input = "?";
+    while($input !~ m/r/i){
+        if($input =~ m/\?/i){
+            $input = $self->getUserInput($self->getKingMenuText());
         } else {
-            $input = $self->getUserInput("\n\rInn (? for menu)");
+            $input = $self->getUserInput("\n\rCastle(? for menu)");
         }
     }
+    return 1;
 }
 
-sub withdrawMoney {
-    my $self = shift;
-    my $character = shift;
-
-    my $max_withdrawl = $character->getMoneyInBank();
-
-    if($max_withdrawl< 1){
-        print "You don't have any money to withdraw, quit wasting your own time!";
-        return;
-    }
-
-    my $input = $self->getUserInput("How much do you want to withdraw? ( 0 - $max_withdrawl, [A]ll my money ): ");
-
-    if($input =~ /a/i){
-        $input = $max_withdrawl;
-    } elsif($input =~ /\d+/){
-        if($input > $max_withdrawl|| $input < 1){
-            print "\n\rQuit messing around, I can't withdraw that amount and you know it!\n\r";
-            return;
-        }
-    } else {
-        print "\n\rThat isn't a valid amount, please enter how many gold coins you want to withdraw, or 'a' for all of the money in the bank.";
-        return;
-    }
-    print "\n\rYou take your money and put it into your coin purse... lets hope someone doesn't try to take it from you";
-    $character->setMoneyOnHand($character->getMoneyOnHand() + $input);
-    $character->setMoneyInBank($character->getMoneyInBank() - $input);
-    $character->store();
+sub getKingMenuText {
+    return "        [K]ings Chamber
+        [R]eturn to main street\n\r\n\rCastle(? for menu)";
 }
-
-sub depositMoney {
-    my $self = shift;
-    my $character = shift;
-
-    my $max_deposit = $character->getMoneyOnHand();
-
-    if($max_deposit < 1){
-        print "You don't have any money to deposit, quit wasting your own time!";
-        return;
-    }
-
-    my $input = $self->getUserInput("How much do you want to deposit? ( 0 - $max_deposit, [A]ll my money ): ");
-
-    if($input =~ /a/i){
-        $input = $max_deposit;
-    } elsif($input =~ /\d+/){
-        if($input > $max_deposit || $input < 1){
-            print "\n\rQuit messing around, I can't deposit that amount and you know it!\n\r";
-            return;
-        }
-    } else {
-        print "\n\rThat isn't a valid amount, please enter how many gold coins you want to deposit, or 'a' for all of the money on you.";
-        return;
-    }
-
-    print "\n\rYou hand over your money... good choice, it is much safer here!";
-    $character->setMoneyOnHand($character->getMoneyOnHand() - $input);
-    $character->setMoneyInBank($character->getMoneyInBank() + $input);
-    $character->store();
-}
-
 sub getMenuText {
-    return "        [D]eposit money
-        [W]ithdrawl money
-        [S]teal
-        [R]eturn to main street\n\r\n\rBank (? for menu)";
+    return "        [U]usurp the throne! Down with the king! 
+        [R]eturn to main street\n\r\n\rCastle(? for menu)";
 }
 1;

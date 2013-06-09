@@ -3,6 +3,13 @@
 use strict;
 use warnings;
 
+BEGIN {
+    #setup @INC
+    my $path = `pwd`;
+    $path =~ s/\n//g;
+    push @INC,  "$path/libs/";
+}
+
 use Getopt::Long;
 use Usurper::Model::Character;
 use Usurper::Model::Town;
