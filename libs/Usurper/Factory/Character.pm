@@ -30,6 +30,15 @@ sub search {
     return $self->_buildList($db);
 }
 
+sub getKing {
+    my $self = shift;
+
+    my $db = Usurper::Database->new();
+    $db->readQuery("SELECT * FROM Characters where is_king = 1");
+    my $king = $self->_buildList($db)->get(0);
+    return $king;
+}
+
 sub getAllInJail {
     my $self = shift;
 

@@ -184,36 +184,7 @@ sub lookForMonsters {
     $character->store();
 }
 
-sub quickHeal {
-    my $self = shift;
-    my $character = shift;
 
-    my $need = ceil(($character->getHitpointTotal() - $character->getHitpoints())/ 5);
-    my $have = $character->getHealings();
-    if($have < 1){
-        print "You don't have any healings.\n\r";
-        $self->pauseForUserInput("Press any key to continue...\n\r");
-        return;
-    }
-    if($need < 0){
-        print "You don't need any healing.\n\r";
-        $self->pauseForUserInput("Press any key to continue...\n\r");
-        return;
-    }
-
-    my $hitpoints = 0;
-    if($need > $have) {
-        $hitpoints = 5*$have;
-        print "You need $need healing potions but only have $have.  You will heal for $hitpoints hitpoints \n\r";
-    } else {
-        $hitpoints = 5*$need;
-        print "You have $have healing potions and need $need, you will use $need.  You will heal for $hitpoints hitpoints \n\r";
-    }
-    $hitpoints = ($character->getHitpointTotal() < $character->getHitpoints() + $hitpoints) ? $character->getHitpointTotal()- $character->getHitpoints() : $hitpoints;
-    $character->setHitpoints($character->getHitpoints()+$hitpoints);
-    $character->setHealings($need > $have ? 0 : $have - $need);
-    $self->pauseForUserInput("Press any key to continue...\n\r");
-}
 
 sub getMenuText {
     my $self = shift;

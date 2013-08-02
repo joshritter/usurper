@@ -61,6 +61,7 @@ sub enter {
 
     $self->printIntroMessage($character);
     $self->wait(2);
+    $self->pauseForUserInput("Press any key to continue...\n\r");
     
     my $input = "?";
     my $just_released = 0;
