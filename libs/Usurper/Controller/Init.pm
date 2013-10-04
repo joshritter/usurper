@@ -60,7 +60,12 @@ sub dailyReset {
     
     $db->writeQuery("DELETE from Settings");
     $db->writeQuery("INSERT INTO Settings (last_update, had_jail_escape_attempt) VALUES (NOW(), 0)");
-    $db->writeQuery("UPDATE Characters SET dungeon_fights_per_day = ?, money_in_bank = money_in_bank * 1.1", 25);
+    my $days = $self->needsDailyReset();
+    my $rate = 1.1;
+    if($days && $days > 1){
+        $rate = $rate ** $days;
+    }
+    $db->writeQuery("UPDATE Characters SET dungeon_fights_per_day = ?, money_in_bank = money_in_bank * ?", 25, $rate);
 }
 
 sub reset {
