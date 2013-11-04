@@ -24,8 +24,9 @@ sub new {
     my $self = bless {}, $class;
 
     my $name = shift;
+    my $db = shift;
 
-    $self->init($name);
+    $self->init($name, $db);
 
     return $self;
 }
@@ -34,6 +35,7 @@ sub new {
 sub init {
     my $self = shift;
     my $name = shift;
+    my $db = shift;
 
     my $itemFactory = Usurper::Factory::Item->new();
     my $weapons = $itemFactory->getByType('weapon');
@@ -54,6 +56,7 @@ sub init {
     $self->setArea('_magic_place', Usurper::Model::Area::MagicPlace->new({"owner" => "Merlin" }));
     $self->setArea('_level_masters', Usurper::Model::Area::LevelMasters->new({"owner" => "Kai" }));
     $self->setArea('_jail', Usurper::Model::Area::Jail->new({"owner" => "Bert" }));
+    $self->setArea('_castle', Usurper::Model::Area::Castle->new({"owner" => "Bert" }, $db));
 
 }
 
@@ -73,6 +76,11 @@ sub getArea {
     my $self = shift;
     my $area = shift;
     return $self->{'_areas'}->{$area};
+}
+
+sub getCastle {
+    my $self = shift;
+    return $self->getArea('_castle');
 }
 
 sub getJail {

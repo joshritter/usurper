@@ -20,6 +20,11 @@ sub enter {
     print "This area is currently under construction.  You peek your head in, but are quickly shoed away, better try somewhere else.";
 }
 
+###
+# 
+# takes to Usurper::Model::Character objects, and returns the 'winner' of the fight (the person who goes below 0 hitpoints loses)
+#
+# #
 sub fight {
     my $self = shift;
     my $attacker = shift;

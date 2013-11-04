@@ -24,7 +24,8 @@ use POSIX;#for ceil
 
 
 #this controller is responsible for all game resets (full reset, daily, and also initial installs)
-my $init = Usurper::Controller::Init->new();
+my $game_settings = Usurper::Settings->new();
+my $init = Usurper::Controller::Init->new($game_settings);
 
 my $reset = 0;
 my $value = GetOptions (
@@ -42,9 +43,10 @@ my $db = Usurper::Database->new();
 $db->readQuery("SELECT * from Settings");
 my $daily_settings = $db->fetchRow();
 my $date = $daily_settings->{'last_update'};
+my $daily_taxes = 0;
 
 if($init->needsDailyReset($date)){
-    $init->dailyReset();
+    $daily_taxes = $init->dailyReset($date);
 
     #refetch settings after reset
     $db->readQuery("SELECT * from Settings");
@@ -52,14 +54,13 @@ if($init->needsDailyReset($date)){
 
 }
 
-my $game_settings = Usurper::Settings->new();
 $game_settings->setDailySettings($daily_settings);
 
 #prompt user for login/new character creation
 my $character = $init->initCharacter();
 
-my $town = Usurper::Controller::Town->new(Usurper::Model::Town->new("Ausburg"), $game_settings);
-
+my $town = Usurper::Controller::Town->new(Usurper::Model::Town->new("Ausburg", $db), $game_settings);
+$town->updateCastleSettings({ '_money_from_taxes' => $daily_taxes });
 # This kicks off the main game loop which waits for user input
 $town->enter($character);
 

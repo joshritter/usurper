@@ -10,16 +10,36 @@ sub new {
     my $class = shift;
     my $self = $class->SUPER::new();
 
-    $self->{'_store'} = shift;
+    $self->{'_castle'} = shift;
+    $self->{'_settings'} = shift;
 
     my $king = Usurper::Factory::Character->new()->getKing();
     $self->{'_king'} = $king;
     return $self;
 }
 
+sub getCastle {
+    my $self = shift;
+    return $self->{'_castle'};
+}
+
 sub getKing {
     my $self = shift;
     return $self->{'_king'};
+}
+
+sub getSettings {
+    my $self = shift;
+    return $self->{'_settings'};
+}
+
+sub updateCastleSettings {
+    my $self = shift;
+    my $input = shift;
+
+    my $castle = $self->getCastle();
+    $castle->setMoneyInVault($castle->getMoneyInVault() + $input->{'_money_from_taxes'});
+    $castle->store();
 }
 
 sub enter {
@@ -85,19 +105,79 @@ sub enterCastle {
 
     print "You walk through the gates into the castle.  It is good to be home!\n\r";
     my $input = "?";
-    while($input !~ m/r/i){
-        if($input =~ m/\?/i){
+    while($input !~ m/r/i) {
+        if($input =~ m/\?/i) {
             $input = $self->getUserInput($self->getKingMenuText());
-        } elsif($input =~ /s/i){
+        } elsif($input =~ m/k/i) {
+            $input = $self->enterKingsChambers($character);
+        } elsif($input =~ /s/i) {
             print "Good choice, there isn't a much safer place than the castle!\n\r";
             $character->setRestArea('castle');
             $character->store();
             return -1;
-        }else {
+        } else {
             $input = $self->getUserInput("\n\rCastle(? for menu)");
         }
     }
     return 1;
+}
+
+sub enterKingsChambers {
+    my $self = shift;
+    my $character = shift;
+
+    my $input = "?";
+    while($input !~ m/r/i) {
+        if($input =~ m/\?/i) {
+            $input = $self->getUserInput($self->getKingsChamberMenuText());
+        } elsif($input =~ m/o/i) {
+            $input = $self->viewOrders($character);
+        } else {
+            $input = $self->getUserInput("\n\rKings Chambers(? for menu)");
+        }
+    }
+    return 1;
+
+}
+
+sub viewOrders {
+    my $self = shift;
+    my $character = shift;
+
+    my $input = "?";
+    while($input !~ m/r/i) {
+        if($input =~ m/\?/i) {
+            $input = $self->getUserInput($self->getOrdersMenuText());
+        } elsif($input =~ m/s/i) {
+            print "Choose your tax rate wisely! You can tax up to 7% of your subjects money per day.";
+            my $rate = $self->getUserInput("What would you like to set your taxes to?: [0-7]");
+            while($rate !~ m/\d/ || $rate < 0 || $rate > 7){
+                $rate = $self->getUserInput("Invalid input, please enter a valid tax rate [0-7]"); 
+            }
+            $self->getSettings()->setTaxRate($rate / 100);
+            $self->getSettings()->storeSettings(); 
+            if($rate > 5) {
+                print "You've set the tax rate to $rate %, you can feel the tears of your subjects already!  The people won't stand for this for long."
+            }elsif($rate > 3) {
+                print "You've set the tax rate to a heafty $rate%.";
+            }elsif($rate > 0) {
+                print "You've set the tax rate to a mere $rate%.  The people rejoice";
+            } else {
+                print "You have removed all taxes.  Be careful your subjects don't read your kindess as weakness!";
+            }
+            print "\n\r";
+            $input = "?";
+        } else {
+            $input = $self->getUserInput("\n\rOrders(? for menu)");
+        }
+    }
+    return 1;
+
+}
+
+sub getOrdersMenuText{
+    return "        [S]et taxes
+        [R]eturn Chambers\n\r\n\rOrders(? for menu)";
 }
 
 sub getKingMenuText {
@@ -105,8 +185,18 @@ sub getKingMenuText {
         [S]leep here for the night
         [R]eturn to main street\n\r\n\rCastle(? for menu)";
 }
+
+sub getKingsChamberMenuText {
+    return "        [S]leep
+        [O]rders
+        [J]ail
+        [R]eturn to Castle\n\r\n\rKings Chambers(? for menu)";
+
+}
+
 sub getMenuText {
     return "        [U]usurp the throne! Down with the king! 
         [R]eturn to main street\n\r\n\rCastle(? for menu)";
 }
+
 1;

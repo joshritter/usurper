@@ -35,8 +35,15 @@ sub new {
     $self->{'_controllers'}->{'bank'} = Usurper::Controller::Area::Bank->new($town->getBank());
     $self->{'_controllers'}->{'jail'} = Usurper::Controller::Area::Jail->new($town->getJail(), $game_settings->getDailySettings()->{'had_jail_escape_attempt'});
     $self->{'_controllers'}->{'stats'} = Usurper::Controller::Area::CharacterStats->new();
-    $self->{'_controllers'}->{'castle'} = Usurper::Controller::Area::Castle->new();
+    $self->{'_controllers'}->{'castle'} = Usurper::Controller::Area::Castle->new($town->getCastle(), $game_settings);
     return $self;
+}
+
+#used for daily reset
+sub updateCastleSettings {
+    my $self = shift;
+    my $settings = shift;
+    $self->getController('castle')->updateCastleSettings($settings);
 }
 
 sub enter {

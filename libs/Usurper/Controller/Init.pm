@@ -8,6 +8,7 @@ use Usurper::Controller::CreateCharacter;
 use Usurper::Model::Character;
 use Usurper::Factory::Item;
 use Usurper::Database;
+use Usurper::Settings;
 use POSIX;#for ceil
 
 use base qw(Usurper::Controller);
@@ -16,6 +17,7 @@ sub new {
     my $class = shift;
     my $self = $class->SUPER::new();
     $self->{'_db'} = Usurper::Database->new();
+    $self->{'_settings'} = shift;
     return $self;
 
 }
@@ -50,22 +52,33 @@ sub needsDailyReset {
     use Data::Dumper;
     my $last_update = DateTime->new(year=> $split[0], month => $split[1], day   => $split[2] );
     my $now = DateTime->now;
-
+    
     return $now->delta_days($last_update)->days;
 }
 
 sub dailyReset {
     my $self = shift;
+    my $date = shift;
     my $db = $self->{'_db'};
     
     $db->writeQuery("DELETE from Settings");
     $db->writeQuery("INSERT INTO Settings (last_update, had_jail_escape_attempt) VALUES (NOW(), 0)");
-    my $days = $self->needsDailyReset();
-    my $rate = 1.1;
+    my $days = $self->needsDailyReset($date);
+    my $rate = 1 + $self->{'_settings'}->getInterestRate() ;#interest
     if($days && $days > 1){
         $rate = $rate ** $days;
     }
-    $db->writeQuery("UPDATE Characters SET dungeon_fights_per_day = ?, money_in_bank = money_in_bank * ?", 25, $rate);
+    my $tax_rate = $self->{'_settings'}->getTaxRate();
+
+    if($days && $days > 1){
+        $tax_rate = $tax_rate ** $days;
+    }
+
+    $db->readQuery("SELECT sum(money_in_bank) as total from Characters");
+    my $row = $db->fetchRow();
+    my $sum = $row->{'total'};
+    $db->writeQuery("UPDATE Characters SET dungeon_fights_per_day = ?, money_in_bank = money_in_bank * ? - money_in_bank * ?", 25, $rate, $tax_rate);
+    return ($sum * $tax_rate)
 }
 
 sub reset {
