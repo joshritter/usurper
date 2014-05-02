@@ -13,6 +13,7 @@ use Usurper::Model::Area::Brothel;
 use Usurper::Model::Area::Bank;
 use Usurper::Model::Area::ScienceCenter;
 use Usurper::Model::Area::AlchemyAlcove;
+use Usurper::Model::Area::Castle;
 use Usurper::Model::Area::Pub;
 use Usurper::Model::Area::MagicPlace;
 use Usurper::Model::Area::LevelMasters;

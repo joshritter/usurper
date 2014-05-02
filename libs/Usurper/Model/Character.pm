@@ -16,11 +16,12 @@ sub new {
 
     $self->{'_item_factory'} = Usurper::Factory::Item->new();
     my $login = shift;
+    my $password = shift;
     if($login){
         if(ref $login eq 'HASH'){
             return $self->initFromHash($login);
         }
-        return $self->init($login);
+        return $self->init($login, $password);
     }
 
     return $self;
@@ -32,9 +33,10 @@ sub new {
 sub init {
     my $self = shift;
     my $login = shift;
+    my $password = shift;
 
     my $db = Usurper::Database->new();
-    $db->readQuery("SELECT * from Characters where name = ?", $login);
+    $db->readQuery("SELECT * from Characters where name = ? AND password = ? and is_npc = 0", $login, $password);
 
     my $row = $db->fetchRow();
 

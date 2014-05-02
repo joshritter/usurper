@@ -92,9 +92,18 @@ sub clearScreen {
 sub getUserInput {
     my $self = shift;
     my $text = shift;
+    my $supress_key_strokes = shift || 0;
+
     my $input;
     print $text;
+    if($supress_key_strokes) { 
+        `stty -echo`;
+    }
     $input = <STDIN>;
+    if($supress_key_strokes) { 
+        `stty echo`;
+        print "\r\n";
+    }
     $input =~ s/\s$//g;
     return $input;
 }

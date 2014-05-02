@@ -23,6 +23,7 @@ sub store {
     my $self = shift;
     my $db = $self->{'_db'};
 
+    $db->writeQuery("DELETE FROM Castle");
     $db->writeQuery("REPLACE INTO Castle (money) VALUES (?)", $self->getMoneyInVault());
     return $self;
 }

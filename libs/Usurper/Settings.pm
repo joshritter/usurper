@@ -51,6 +51,7 @@ sub _loadSettings {
     }
     $self->{'_settings'}->{'_interest_rate'} = $VAR1->{'_interest_rate'};
     $self->{'_settings'}->{'_tax_rate'} = $VAR1->{'_tax_rate'};
+    $self->{'_settings'}->{'_king_vault_money'} = $VAR1->{'_king_vault_money'};
 }
 
 sub storeSettings {
@@ -121,4 +122,8 @@ sub getTaxRate {
     return $self->{'_settings'}->{'_tax_rate'};
 }
 
+sub getKingsVaultMoney {
+    my $self = shift;
+    return $self->{'_settings'}->{'_king_vault_money'};
+}
 1;

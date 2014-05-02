@@ -11,7 +11,7 @@ use Usurper::Factory::Character;
 sub new {
     my $class = shift;
     my $self = $class->SUPER::new();
-   
+
     $self->{'_store'} = shift;
     $self->{'_level_data'} = shift;
 
@@ -24,20 +24,20 @@ sub enter {
 
     $self->clearScreen();
     my $store = $self->{'_store'};
-    
+
     print "You walk up to ". $store->getOwner() .", the level master, he looks you over and without saying a word turns around and goes about his business \n\r";
     print "What do you want to ask of him?\n\r\n\r";
-    
+
     my $input = "?";
     while($input !~ m/r/i){
         if($input =~ m/\?/i){
             $input = $self->getUserInput($self->getMenuText());
         } elsif ($input =~ m/l/i){
             $self->getLevelRaise($character, $self->getLevelData());
-            $input = "?"; 
+            $input = "?";
         } elsif ($input =~ m/c/i){
             $self->crystalBall($character);
-            $input = "?"; 
+            $input = "?";
         } else {
             $input = $self->getUserInput("\n\rLevel Master(? for menu)");
         }
@@ -48,7 +48,7 @@ sub enter {
 sub crystalBall {
     my $self = shift;
     my $character = shift;
-   
+
     my $input = $self->getUserInput("Who do you wish to find?");
 
     my $factory = Usurper::Factory::Character->new();
@@ -63,7 +63,7 @@ sub crystalBall {
     while(my $current = $iterator->next()){
         $input = $self->getUserInput("Are you looking for ". $current->getName(). "? [Y]es or [N]o: ");
 
-        
+
         if($input =~ /y/i){
             if($current->getIsKing()){
                 print "You want me to spy on the king?? Get out! Traitor.\n\r\n\r";
@@ -93,26 +93,6 @@ sub crystalBall {
     $self->pauseForUserInput("Press any key to continue...\n\r");
 }
 
-
-sub printMasterList {
-    my $self = shift;
-    my $store = $self->{'_store'};
-
-    my $weapons = $store->getWeapons();
-    print "__________________________________________________\n\r";
-    print "Name:                       cost:\n\r\n\r" ;
-    my $count = 0;
-    my $n = 0;
-    foreach my $weapon_id (keys %$weapons){
-        my $weapon = $weapons->{$weapon_id};
-        print $n+1 . ".) ". $weapon->getName();
-        print "                     ".$weapon->getAttribute('cost') ."\n\r";
-        
-        $n++;
-    }
-    print "__________________________________________________\n\r\n\r";
-}
-
 sub getLevelRaise {
     my $self = shift;
     my $character = shift;
@@ -128,6 +108,7 @@ sub getLevelRaise {
     }
 
     if(!$experience_for_next_level){
+        print "There is nothing more for me to teach you, I hope you use your knowledge well.\n\r\n\r";
         return;
     }
 

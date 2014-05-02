@@ -51,16 +51,17 @@ if($init->needsDailyReset($date)){
     #refetch settings after reset
     $db->readQuery("SELECT * from Settings");
     $daily_settings = $db->fetchRow();
-
+    #warn $daily_taxes;
 }
 
 $game_settings->setDailySettings($daily_settings);
 
+my $town = Usurper::Controller::Town->new(Usurper::Model::Town->new("Ausburg", $db), $game_settings);
+$town->updateCastleSettings({ '_money_from_taxes' => $daily_taxes });
+
 #prompt user for login/new character creation
 my $character = $init->initCharacter();
 
-my $town = Usurper::Controller::Town->new(Usurper::Model::Town->new("Ausburg", $db), $game_settings);
-$town->updateCastleSettings({ '_money_from_taxes' => $daily_taxes });
 # This kicks off the main game loop which waits for user input
 $town->enter($character);
 

@@ -8,6 +8,7 @@ use base qw(Usurper::Controller);
 
 use Usurper::Database;
 use Data::Dumper;
+use Digest::MD5 qw(md5_hex);
 
 sub createNewCharacter {
     my $self = shift;
@@ -22,6 +23,13 @@ sub createNewCharacter {
             print "\n\rTry again... someone with that name exists in this world already\n\r";
         }
     }
+    my $new_password = $self->getUserInput("Create a password: ", 1); 
+    while($new_password ne $self->getUserInput("Re-enter password: ", 1)){
+        print "Your passwords didn't match, please try again.\n\r";
+        $new_password = $self->getUserInput("Password: ", 1); 
+    }
+
+    $new_password = md5_hex($new_password);
 
     my $char_data;
     $char_data->{'name'} = $new_login;
@@ -72,7 +80,7 @@ sub createNewCharacter {
         $char_data->{'class'} = "Scientist";
     }
 
-    $char_data->{'password'} = "TODOFIX";
+    $char_data->{'password'} = $new_password;
     $char_data->{'age'} = 18;
     $char_data->{'sex'} = 'm';
     $char_data->{'level'} = 1;

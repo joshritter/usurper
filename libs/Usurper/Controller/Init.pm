@@ -9,8 +9,11 @@ use Usurper::Model::Character;
 use Usurper::Factory::Item;
 use Usurper::Database;
 use Usurper::Settings;
-use POSIX;#for ceil
 
+use POSIX;#for ceil
+use Digest::MD5 qw(md5_hex);
+
+#test
 use base qw(Usurper::Controller);
 
 sub new {
@@ -26,12 +29,14 @@ sub initCharacter {
     my $self = shift;
     my $character;
     my $login;
+    my $password;
     while(!$character){
         $login = $self->getUserInput("Username(Type 'New' to create a new character): "); 
         if($login =~ m/new/i){
-            $character = Usurper::Controller::CreateCharacter->new()->createNewCharacter($login);
+            $character = Usurper::Controller::CreateCharacter->new()->createNewCharacter($login, $password);
         } else {
-            $character = Usurper::Model::Character->new($login);
+            $password = md5_hex($self->getUserInput("Password: ", 1)); 
+            $character = Usurper::Model::Character->new($login, $password);
             if(!$character){
                 print "Couldn't find a character with that login, please try again \n\r";
             }
@@ -52,7 +57,8 @@ sub needsDailyReset {
     use Data::Dumper;
     my $last_update = DateTime->new(year=> $split[0], month => $split[1], day   => $split[2] );
     my $now = DateTime->now;
-    
+
+#    return 1;
     return $now->delta_days($last_update)->days;
 }
 
