@@ -64,10 +64,12 @@ sub enter {
                 $winner->setIsKing(1);
                 $winner->store();
                 my $king = $self->{'_king'};
-                $king->setIsKing(0);
-                $king->store();
+                if($king) {
+                    $king->setIsKing(0);
+                    $king->store();
+                    print "You have defeated the king!  The castle is now yours!!\n\r";
+                }
                 $self->{'_king'} = $winner;
-                print "You have defeated the king!  The castle is now yours!!\n\r";
                 $self->pauseForUserInput("Press any key to continue...\n\r");
                 return $self->enterCastle($character);
             }
@@ -132,6 +134,21 @@ sub enterKingsChambers {
             $input = $self->getUserInput($self->getKingsChamberMenuText());
         } elsif($input =~ m/o/i) {
             $input = $self->viewOrders($character);
+        } elsif($input =~ m/a/i){
+            my $response = "";
+            while($response !~ m/[ynYN]/i){
+                $response = $self->getUserInput("Are you sure you want to step down and no longer be the king?\n\r [Y]es, I can't take this anymore.\n\r [N]o, I still thirst for power\n\r");
+            }
+            if($response =~ m/y/i){
+                print "You take the crown off your head, and walk out the castle.\n\r";
+                $character->setIsKing(0);
+                $character->store();
+                $self->{'_king'} = undef;
+                $self->pauseForUserInput("Press any key to continue...\n\r");
+
+                return "r";
+            }
+            $input = "?";
         } elsif($input =~ m/s/i) {
            return 's';
         } else {
@@ -202,10 +219,12 @@ sub getKingMenuText {
         [R]eturn to main street\n\r\n\rCastle(? for menu)";
 }
 
+#XXX add ability to abdicate the throne
 sub getKingsChamberMenuText {
     return "        [S]leep
         [O]rders
         [J]ail
+        [A]bdicate the throne
         [R]eturn to Castle\n\r\n\rKings Chambers(? for menu)";
 
 }
